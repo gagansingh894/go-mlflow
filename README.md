@@ -5,9 +5,9 @@ The package provides functionality related to MLflow tracking such as list exper
 Install
 =======
 Since this is a client package for MLflow server, Please ensure that MLflow is up and running.
-If MLflow is not installed, you can check the installation instructions here.
+If MLflow is not installed, you can check the installation instructions [here](https://mlflow.org/docs/latest/quickstart.html).
 
-To install go-mlflow, simple run the following command
+To install go-mlflow, simply run the following command
 ```
 go get github.com/gagansingh894/go-mlflow
 ```
