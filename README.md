@@ -20,7 +20,7 @@ package main
 import mlflow "github.com/gagansingh894/go-mlflow/mlflow"
 
 func main() {
-    // Create a client for connecting with running MLflow server
+    // Create a client for connecting with MLflow server
 	m := mlflow.Client("http://localhost", "5000")
     // Create experiment with name 'test1' and location ''
 	_ = m.CreateExperiment("test1", "./mlruns/1")
