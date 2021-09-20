@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	// Create a client for connecting with running MLflow server
+	// Create a client for connecting with MLflow server
 	m := mlflow.Client("http://localhost", "5000")
 	// Create experiment with name 'test1' and location './mlruns/1'
 	_ = m.CreateExperiment("test1", "./mlruns/1")
