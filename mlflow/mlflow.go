@@ -43,11 +43,12 @@ type Mlflowapi interface {
 	SearchRun(experimentIDS []string, filter string, runViewType ViewType, maxResults int32, orderBy []string, pageToken string) SearchRunsResponse
 }
 
-// Client function creates a new instance of Mlflow struct. The user will use this function to create the client for MLFLOW server
-func Client(host string, port string) Mlflow {
+// NewClient function creates a new instance of Mlflow struct. The user will use this function to create the client for MLFLOW server
+func NewClient(host string, port string) *Mlflow {
 	url := host + ":" + port
 	client := &http.Client{}
-	return Mlflow{host: host, port: port, url: url, client: *client}
+	mlflow := Mlflow{host: host, port: port, url: url, client: *client}
+	return &mlflow
 }
 
 // prettyPrint is helper function for beautifying the json responses from the MLFLOW server
