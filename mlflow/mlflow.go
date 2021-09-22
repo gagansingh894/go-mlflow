@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -57,11 +56,11 @@ func prettyPrint(i interface{}) {
 	fmt.Println(string(s))
 }
 
-func base(m *Mlflow, endpoint string, requestStruct interface{}, requestType string) []byte {
-	var defaultBytes []byte
+func base(m *Mlflow, endpoint string, requestStruct interface{}, requestType string) (data *[]byte, err error) {
+	var responseBodyBytes []byte
 	requestJSON, err := json.Marshal(requestStruct)
 	if err != nil {
-		log.Fatal(err)
+		return &responseBodyBytes, err
 	}
 
 	requestBytes := new(bytes.Buffer)
@@ -71,94 +70,116 @@ func base(m *Mlflow, endpoint string, requestStruct interface{}, requestType str
 	response, err := m.client.Do(request)
 
 	if err != nil {
-		log.Fatal(err)
+		return &responseBodyBytes, err
 	}
 
 	if response.StatusCode == http.StatusOK {
 		responseBodyBytes, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			log.Fatal(err)
+			return &responseBodyBytes, err
 		} else {
-			return responseBodyBytes
+			return &responseBodyBytes, nil
 		}
 		//_ = json.Unmarshal(responseBodyBytes, &responseStruct)
 
 	} else if response.StatusCode == http.StatusBadRequest {
 		responseBodyBytes, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			log.Fatal(err)
+			return &responseBodyBytes, err
 		} else {
-			return responseBodyBytes
+			return &responseBodyBytes, nil
 		}
 		//_ = json.Unmarshal(responseBodyBytes, &responseStruct)
 	} else {
-		log.Fatal("Unexpected error occured")
+		return &responseBodyBytes, err
 	}
-	return defaultBytes
+	return &responseBodyBytes, err // placeholder
 }
 
 // CreateExperiment is an interface method used to create a new experiment in MLFLOW
-func (m *Mlflow) CreateExperiment(name string, artifactLocation string) CreateExperimentResponse {
+func (m *Mlflow) CreateExperiment(name string, artifactLocation string) (response *CreateExperimentResponse, err error) {
 	endpoint := m.url + "/api/2.0/mlflow/experiments/create"
 	requestStruct := CreateExperimentRequest{Name: name, ArtifactLocation: artifactLocation}
 	var responseStruct CreateExperimentResponse
-	baseResponse := base(m, endpoint, requestStruct, "POST")
-	_ = json.Unmarshal(baseResponse, &responseStruct)
-	prettyPrint(responseStruct)
-	return responseStruct
+	baseResponse, err := base(m, endpoint, requestStruct, "POST")
+	if err == nil {
+		_ = json.Unmarshal(*baseResponse, &responseStruct)
+		prettyPrint(responseStruct)
+		return &responseStruct, nil
+	}
+	return &responseStruct, err
 }
 
-func (m *Mlflow) ListExperiments() ListExperimentsResponse {
+func (m *Mlflow) ListExperiments() (response *ListExperimentsResponse, err error) {
 	endpoint := m.url + "/api/2.0/mlflow/experiments/list"
 	var responseStruct ListExperimentsResponse
-	baseResponse := base(m, endpoint, nil, "GET")
-	_ = json.Unmarshal(baseResponse, &responseStruct)
-	prettyPrint(responseStruct)
-	return responseStruct
+	baseResponse, err := base(m, endpoint, nil, "GET")
+	if err == nil {
+		_ = json.Unmarshal(*baseResponse, &responseStruct)
+		prettyPrint(responseStruct)
+		return &responseStruct, nil
+	}
+	return &responseStruct, err
 }
 
-func (m *Mlflow) GetExperiment(experimentID string) GetExperimentResponse {
+func (m *Mlflow) GetExperiment(experimentID string) (response *GetExperimentResponse, err error) {
 	endpoint := m.url + "/api/2.0/mlflow/experiments/get"
 	requestStruct := GetExperimentRequest{ExperimentID: experimentID}
 	var responseStruct GetExperimentResponse
-	baseResponse := base(m, endpoint, requestStruct, "GET")
-	_ = json.Unmarshal(baseResponse, &responseStruct)
-	prettyPrint(responseStruct)
-	return responseStruct
+	baseResponse, err := base(m, endpoint, requestStruct, "GET")
+	if err == nil {
+		_ = json.Unmarshal(*baseResponse, &responseStruct)
+		prettyPrint(responseStruct)
+		return &responseStruct, nil
+	}
+	return &responseStruct, err
 }
 
-func (m *Mlflow) GetExperimentByName(experimentName string) GetExperimentByNameResponse {
+func (m *Mlflow) GetExperimentByName(experimentName string) (response *GetExperimentByNameResponse, err error) {
 	endpoint := m.url + "/api/2.0/mlflow/experiments/get-by-name"
 	requestStruct := GetExperimentByNameRequest{ExperimentName: experimentName}
 	var responseStruct GetExperimentByNameResponse
-	baseResponse := base(m, endpoint, requestStruct, "GET")
-	_ = json.Unmarshal(baseResponse, &responseStruct)
-	prettyPrint(responseStruct)
-	return responseStruct
+	baseResponse, err := base(m, endpoint, requestStruct, "GET")
+	if err == nil {
+		_ = json.Unmarshal(*baseResponse, &responseStruct)
+		prettyPrint(responseStruct)
+		return &responseStruct, nil
+	}
+	return &responseStruct, err
 }
 
-func (m *Mlflow) DeleteExperiment(experimentID string) {
+func (m *Mlflow) DeleteExperiment(experimentID string) error {
 	endpoint := m.url + "/api/2.0/mlflow/experiments/delete"
 	requestStruct := DeleteExperimentRequest{ExperimentID: experimentID}
-	_ = base(m, endpoint, requestStruct, "GET")
+	_, err := base(m, endpoint, requestStruct, "GET")
+	if err == nil {
+		return nil
+	}
+	return err
 }
 
-func (m *Mlflow) GetRun(runID string, runUUID string) GetRunResponse {
+func (m *Mlflow) GetRun(runID string, runUUID string) (response *GetRunResponse, err error) {
 	endpoint := m.url + "/api/2.0/mlflow/runs/get"
 	requestStruct := GetRunRequest{RunID: runID, RunUUID: runUUID}
 	var responseStruct GetRunResponse
-	baseResponse := base(m, endpoint, requestStruct, "POST")
-	_ = json.Unmarshal(baseResponse, &responseStruct)
-	prettyPrint(responseStruct)
-	return responseStruct
+	baseResponse, err := base(m, endpoint, requestStruct, "POST")
+	if err == nil {
+		_ = json.Unmarshal(*baseResponse, &responseStruct)
+		prettyPrint(responseStruct)
+		return &responseStruct, nil
+	}
+	return &responseStruct, err
 }
 
-func (m *Mlflow) SearchRun(experimentIDS []string, filter string, runViewType ViewType, maxResults int32, orderBy []string, pageToken string) SearchRunsResponse {
+func (m *Mlflow) SearchRun(experimentIDS []string, filter string, runViewType ViewType, maxResults int32, orderBy []string, pageToken string) (response *SearchRunsResponse, err error) {
 	endpoint := m.url + "/api/2.0/mlflow/runs/search"
 	requestStruct := SearchRunsRequest{ExperimentIDS: experimentIDS, Filter: filter, RunViewType: runViewType, MaxResults: maxResults, OrderBy: orderBy, PageToken: pageToken}
 	var responseStruct SearchRunsResponse
-	baseResponse := base(m, endpoint, requestStruct, "POST")
-	_ = json.Unmarshal(baseResponse, &responseStruct)
-	prettyPrint(responseStruct)
-	return responseStruct
+	baseResponse, err := base(m, endpoint, requestStruct, "POST")
+	if err == nil {
+		_ = json.Unmarshal(*baseResponse, &responseStruct)
+		prettyPrint(responseStruct)
+		return &responseStruct, nil
+	}
+	return &responseStruct, err
 }
